@@ -1,46 +1,55 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Carregar os dados do arquivo CSV (substitua 'dados.csv' pelo nome do seu arquivo)
+# Carregar os dados do CSV
 data = np.loadtxt(r'C:\Users\lucas\Downloads\dados.csv', delimiter=',', skiprows=1)
 
-# Separar as colunas em variáveis X e Y
-freq = data[:, 0] # frequency
-Vpp1 = data[:, 1] # Vpp1
-Vpp2 = data[:, 2] # Vpp2
-phase = data[:, 3] # phase
-T = data[:, 4] # T
-T_dec = data[:,5] # T decibeis
+# Separar as colunas
+freq = data[:, 0]  # Frequência (Hz)
+T_dec = data[:, 5] # Ganho em dB
+phase = data[:, 3] # Fase (graus)
 
-print('freq =', freq)
-print('Vpp1 = ', Vpp1)
-print('Vpp2 = ', Vpp2)
-print('phase = ', phase)
-print('T = ', T)
-print('T_dec =', T_dec)
-
-
-# Criar o diagrama de Bode (dois gráficos)
 plt.figure(figsize=(10, 8))
 
-# 1️⃣ Gráfico do ganho (Magnitude)
-plt.subplot(2, 1, 1)  # 2 linhas, 1 coluna, 1º gráfico
-plt.semilogx(freq, T_dec, 'b-', label='Ganho (dB)')  # Eixo X logarítmico
+# Gráfico de Ganho
+plt.subplot(2, 1, 1)
+plt.semilogx(freq, T_dec, 'b-', label='Ganho (dB)')  # Log no eixo X
+plt.scatter(freq, T_dec, color='blue', marker='o', edgecolors='black', label='Pontos experimentais')  # Pontos usados
+
+# 🔍 **Marcar o ponto de -3 dB (frequência de corte)**
+idx_3dB = np.argmin(np.abs(T_dec + 3))  # Índice do ponto mais próximo de -3 dB
+freq_3dB = freq[idx_3dB]
+T_3dB = T_dec[idx_3dB]
+
+plt.scatter(freq_3dB, T_3dB, color='purple', marker='D', s=100, edgecolors='black', label='Frequência de Corte (-3 dB)')
+plt.text(freq_3dB, T_3dB - 5, f'{freq_3dB:.2f} Hz', color='purple', fontsize=10, ha='center')
+
 plt.xlabel('Frequência (Hz)')
 plt.ylabel('Ganho (dB)')
 plt.title('Diagrama de Bode - Magnitude')
 plt.grid(True, which='both', linestyle='--')
 plt.legend()
 
-# 2️⃣ Gráfico da fase
-plt.subplot(2, 1, 2)  # 2 linhas, 1 coluna, 2º gráfico
-plt.semilogx(freq, phase, 'r-', label='Fase (graus)')  # Eixo X logarítmico
+# Gráfico de Fase
+plt.subplot(2, 1, 2)
+plt.semilogx(freq, phase, 'r-', label='Fase (graus)')  # Log no eixo X
+plt.scatter(freq, phase, color='red', marker='o', edgecolors='black', label='Pontos experimentais')  # Pontos usados
+
+# Encontrar a frequência mais próxima de -45° na fase
+# Encontramos o valor da fase correspondente a essa frequência
+idx_fase_corte = np.argmin(np.abs(freq - freq_3dB))
+fase_corte = phase[idx_fase_corte]
+
+# Plotamos esse ponto no gráfico de fase
+plt.scatter(freq_3dB, fase_corte, color='purple', marker='D', s=100, edgecolors='black', label='Frequência de Corte (-3 dB)')
+plt.text(freq_3dB, fase_corte + 5, f'{freq_3dB:.2f} Hz', color='purple', fontsize=10, ha='center')
+
+
 plt.xlabel('Frequência (Hz)')
 plt.ylabel('Fase (graus)')
 plt.title('Diagrama de Bode - Fase')
 plt.grid(True, which='both', linestyle='--')
 plt.legend()
 
-# Exibir os gráficos
 plt.tight_layout()
 plt.show()
